@@ -19,21 +19,23 @@ class AnalysisDate(Graphics):
 
     def analize(self) -> dict:
         #1--Realizamos el filtrado de los alojamientos de Madrid
-        self.printText('1: Realizamos el filtrado del data set en bruto obteniendo únicamente los alojamientos de Madrid')
+        self.printText('Analysis 1: Realizamos el filtrado del data set en bruto obteniendo únicamente los alojamientos de Madrid')
+        print('[INFO] Realizando filtrado...')
         df_filtered = self.madridOnly(self.df)
         
         #2--Realizamos el split de los datos en train y test
-        self.printText('2: Realizamos la división en train y test del conjunto de datos')
+        self.printText('Analysis 2: Realizamos la división en train y test del conjunto de datos')
+        print('[INFO] Realizando división...\n')
         train, test = self.splitDataFrame()
         print(f'Dimension del grupo de train {train.shape}\n')
         print(f'Dimension del grupo de test {test.shape}\n')
 
         #3--Comprobamos como se distribuye la variable buscada de forma original, su raiz cuadrada y logaritmica
-        self.printText('3: Vamos a ver como se distribuye la variable buscada mediante gráficas de densidad de probabilidad')
-        self.createAndSaveTargetDistribution(df = train, file_name = 'pricehistogram01.png')
+        self.printText('Analysis 3: Vamos a ver como se distribuye la variable buscada mediante gráficas de densidad de probabilidad')
+        self.createAndSaveTargetDistribution(df = train, file_name = 'pricehistogram02.png')
 
         #4--Realizamos un análisis exploratorio de los datos
-        self.printText('4: Vamos a ver que tipos de datos tenemos y un poco de información sobre ellos')
+        self.printText('Analysis 4: Vamos a ver que tipos de datos tenemos y un poco de información sobre ellos')
 
         if self.show_more_info:
             print('<<<<<<<<<<<<<<<<<<<<<<<<<    Información general de dataFrame     >>>>>>>>>>>>>>>>>>>>>>>>>>>\n')

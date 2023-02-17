@@ -16,7 +16,7 @@ class Graphics:
         :param target_col_name: Nombre de la columna objetivo
         :param file_name: Nombre y extension del archivo
         :return: None """
-
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(6, 6))
             #Realizamos la grafica de distribución de la etiqueta
@@ -62,7 +62,7 @@ class Graphics:
             print(f"{self.img_path}{file_name} creado correctamente")
 
         else:
-            print(f"La imagen {file_name} ya existe")
+            print(f"[INFO] La imagen {file_name} ya existe")
 
     def createAndSaveHistogram(self, df: pd.DataFrame, file_name : str, target_col: str= 'Price', columns:list = None) -> None:
         """ Crea una imagen con los histogramas en subplots y la guarda en la ruta img_path. la función calcula el numero de filas a generar y extrae las columnas numéricas del dataframe por defecto
@@ -71,9 +71,10 @@ class Graphics:
         :param file_name: Nombre y extension del archivo
         :param target_col: nombre de la columna etiqueta, por defecto el Price
         :return: None """ 
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
                
-            num_columns= df[columns].colums if columns else df.select_dtypes(include=['float64', 'int64']).columns.drop(target_col)
+            num_columns= df[columns].columns if columns else df.select_dtypes(include=['float64', 'int64']).columns.drop(target_col)
             size= math.ceil(len(num_columns)/3)
             fig, axes = plt.subplots(nrows=size, ncols=3, figsize=(18, 5*size))
             axes = axes.flat
@@ -102,7 +103,7 @@ class Graphics:
                 fig.delaxes(axes[-1])
                 fig.delaxes(axes[-2])
             fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight")
-            print(f"{self.img_path}{file_name} creado correctamente")
+            print(f"[INFO] {self.img_path}{file_name} creado correctamente")
 
         else:
             print(f"La imagen {file_name} ya existe")
@@ -115,40 +116,40 @@ class Graphics:
         :param target_col: nombre de la columna etiqueta, por defecto el Price
         :param columns: por defecto None, lo cual implica que grafica todos las dimensiones del df, 
                         se puede pasar una lista con las columnas que se desea graficar """
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
-            num_columns= df[columns].colums if columns else df.select_dtypes(include=['float64', 'int64']).columns.drop(target_col)
+            num_columns = df[columns].columns if columns else df.select_dtypes(include=['float64', 'int64']).columns.drop(target_col)
             size= math.ceil(len(num_columns)/3)
-            fig, axes = plt.subplots(nrows=size, ncols=3, figsize=(18, 5*size))
+            fig, axes = plt.subplots(nrows=size, ncols=3, figsize=(16, 5*size))
             axes = axes.flat
-            fig.suptitle('Distribución variables numéricas',va='top', y= 1,fontsize = 18)
-            for i, col in enumerate(num_columns):
-                sns.histplot(
-                    data    = df,
-                    x       = col,
-                    stat    = "count",
-                    kde     = True,
-                    color   = (list(plt.rcParams['axes.prop_cycle'])*5)[i]["color"],
-                    line_kws= {'linewidth': 2},
-                    alpha   = 0.3,
-                    ax      = axes[i]
+            fig.suptitle('Relación entre variables',va='top', y= 1,fontsize = 18)
+            for i, colum in enumerate(num_columns):
+                sns.regplot(
+                    x           = df[colum],
+                    y           = df[target_col],
+                    color       = "gray",
+                    marker      = '.',
+                    scatter_kws = {"alpha":0.4},
+                    line_kws    = {"color":"r","alpha":0.5},
+                    ax          = axes[i]
                 )
-                axes[i].set_title(col, fontsize = 12)
+                axes[i].set_title(f"{target_col} vs {colum}", fontsize = 12)
                 axes[i].tick_params(labelsize = 10)
-                plt.subplots_adjust(top=0.9)
                 axes[i].set_xlabel("")
-                fig.tight_layout()
+                axes[i].set_ylabel("")
+            fig.tight_layout()
             #Borramos los subplots que queden vacios
             graf_del = size*3 - len(num_columns)
             if graf_del == 1 :
                 fig.delaxes(axes[-1])
             if graf_del == 2 :
                 fig.delaxes(axes[-1])
-                fig.delaxes(axes[-2]) 
+                fig.delaxes(axes[-2])       
             fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight")
             print(f"{self.img_path}{file_name} creado correctamente")
 
         else:
-            print(f"La imagen {file_name} ya existe")
+            print(f"[INFO] La imagen {file_name} ya existe")
 
     def createAndSaveBoxPlot(self, df: pd.DataFrame, file_name : str, target_col: str= 'Price', columns:list = None):
         """Crea graficos boxplot de todos las dimensiones de df con tipo ['object', 'uint8'] y las guarda en la ruta img_path, si se le pasa una lista con 
@@ -158,6 +159,7 @@ class Graphics:
         :param target_col: nombre de la columna etiqueta, por defecto el Price
         :param columns: por defecto None, lo cual implica que grafica todos las dimensiones del df, 
                         se puede pasar una lista con las columnas que se desea graficar """ 
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             object_columns= df[columns].columns if columns else df.select_dtypes(include=['object', 'uint8']).columns
     #Para realizar una buena visualizacion de los dummies vamos a eliminar del conteo para las filas los dummies que representan los SI
@@ -200,7 +202,7 @@ class Graphics:
             fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight")
             print(f"{self.img_path}{file_name} creado correctamente")
         else:
-            print(f"La imagen {file_name} ya existe")
+            print(f"[INFO] La imagen {file_name} ya existe")
 
     def createAndSaveCategoricalDistribution(self, df: pd.DataFrame, file_name : str, columns:list = None):
         """Crea gráficos de como se distribuyen los datos en las variables categóricas y lo guarda como imagen
@@ -208,6 +210,7 @@ class Graphics:
         :param file_name: Nombre y extension del archivo
         :param columns: por defecto None, lo cual implica que grafica todos las dimensiones del df, 
                         se puede pasar una lista con las columnas que se desea graficar """
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             object_columns= df[columns].columns if columns else df.select_dtypes(include=['object']).columns
             num_plots = len(object_columns)
@@ -219,6 +222,7 @@ class Graphics:
             columnas_object = df.select_dtypes(include=['object']).columns
             fig.suptitle('Distribución variables categóricas',fontsize = 18)
             for i, colum in enumerate(columnas_object):
+                
                 df[colum].value_counts().plot.barh(ax = axes[i])
                 axes[i].set_title(colum, fontsize = 12)
                 axes[i].tick_params(labelsize = 10)
@@ -232,15 +236,16 @@ class Graphics:
             fig.tight_layout()
             plt.subplots_adjust(top=0.9)
             fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight") 
-            print(f"{self.img_path}{file_name} creado correctamente")  
+            print(f"[INFO] {self.img_path}{file_name} creado correctamente")  
         else:
-            print(f"La imagen {file_name} ya existe")
+            print(f"[INFO] La imagen {file_name} ya existe")
 
     def createAndSaveCorrelationMatrix(self, df: pd.DataFrame, file_name : str, target_col: str= 'Price'):
         """Crea la matriz de correlación de las dimensiones numéricas del df
             :param df : Dataframe
             :param file_name: Nombre y extension del archivo
-            """
+           """
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             num_colums = df.select_dtypes(include=['float64', 'int64'])
             corr = np.abs(num_colums.drop([target_col], axis=1).corr())
@@ -257,11 +262,13 @@ class Graphics:
                         linewidths=.1, cmap="YlGnBu", cbar_kws={"shrink": .8})
             fig.suptitle('Matriz de correlación', fontsize=18)
             fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight")  
-            print(f"{self.img_path}{file_name} creado correctamente") 
+            print(f"[INFO] {self.img_path}{file_name} creado correctamente") 
         else:
-            print(f"La imagen {file_name} ya existe")
+            print(f"[INFO] La imagen {file_name} ya existe")
 
     def createAndSaveplotGridValues(self, vector, scores,file_name: str, metric: str, n_folds: int, x_label: str):
+        """"""
+        print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             fig, ax = plt.subplots()
             ax.semilogx(vector,scores,'-o')
@@ -270,22 +277,23 @@ class Graphics:
             plt.savefig(f"{self.img_path}{file_name}")
             print(f"{self.img_path}{file_name} creado correctamente")
         else:
-            print(f"La imagen {file_name} ya existe")
+            print(f"[INFO] La imagen {file_name} ya existe")
 
     @staticmethod
     def printText(text_to_print: str):
-        print(f'\n#######################################################################################\n'
+        print(f'\n#############################################################################################################################\n'
               f'----    {text_to_print}\n'
-              f'#######################################################################################\n')
+              f'###############################################################################################################################\n')
 
 
 
-#airbnb = pd.read_csv("data/raw/airbnb-listings-extract.csv", sep=";")
-
-#prueba = Graphics()
-#prueba.createAndSaveTargetDistribution(df = airbnb, target_col = 'Price', file_name='Prueba2.png')
-#prueba.createAndSaveHistogram(df= airbnb, target_col='Price' ,file_name='prueba3.png')
-#prueba.createAndSaveScatter(df= airbnb, target_col='Price' ,file_name='prueba4.png')
-#prueba.createAndSaveCategoricalDistribution(df= airbnb, file_name='prueba6.png', columns=['Name','City','Room Type'])
-
+airbnb = pd.read_csv("../data/raw/airbnb-listings-extract.csv", sep=";")
+prueba = Graphics()
+#prueba.createAndSaveScatter(airbnb, file_name='numericscatter9.png',target_col = 'Availability 30', columns=['Availability 60'])
+#prueba.createAndSaveTargetDistribution(df = airbnb, file_name = 'pricehistogram06.png')
+#prueba.createAndSaveTargetDistribution(df = airbnb, target_col = 'Price', file_name='Prueba.png')
+#prueba.createAndSaveHistogram(df= airbnb, target_col='Price' ,file_name='prueba8.png',columns=['Bedrooms', 'Bathrooms'])
+#prueba.createAndSaveScatter(df= airbnb, target_col='Price' ,file_name='prueba6.png',columns=['Bedrooms', 'Bathrooms'])
+#prueba.createAndSaveBoxPlot(df= airbnb, file_name='prueba15.png')
+prueba.createAndSaveScatter(df = airbnb, file_name='numericscatter5.png',target_col = 'Availability 30', columns=['Availability 60'])
 #airbnb.info()
