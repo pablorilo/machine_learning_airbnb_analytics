@@ -280,12 +280,12 @@ class Graphics:
 
 
 
-airbnb = pd.read_csv("data/raw/airbnb-listings-extract.csv", sep=";")
+#airbnb = pd.read_csv("data/raw/airbnb-listings-extract.csv", sep=";")
 
-prueba = Graphics()
+#prueba = Graphics()
 #prueba.createAndSaveTargetDistribution(df = airbnb, target_col = 'Price', file_name='Prueba2.png')
 #prueba.createAndSaveHistogram(df= airbnb, target_col='Price' ,file_name='prueba3.png')
 #prueba.createAndSaveScatter(df= airbnb, target_col='Price' ,file_name='prueba4.png')
-prueba.createAndSaveCategoricalDistribution(df= airbnb, file_name='prueba6.png', columns=['Name','City','Room Type'])
+#prueba.createAndSaveCategoricalDistribution(df= airbnb, file_name='prueba6.png', columns=['Name','City','Room Type'])
 
-airbnb.info()
+#airbnb.info()
