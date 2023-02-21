@@ -15,6 +15,7 @@ if __name__ == '__main__':
         train_df = analysis_dict["train"]
         test_df = analysis_dict["test"]
 
-        preprocesing_dict = PreprocessingDate(train_df).run()
-        
+        preprocesing = PreprocessingDate(train_df)
+        preprocesing_dict_train = preprocesing.run(train_df)
+        preprocesing_dict_test = preprocesing.run(test_df,test=True)
     run()

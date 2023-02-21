@@ -6,7 +6,7 @@ import numpy as np
 import math
 
 class Graphics:
-    def __init__(self, img_path : str = "./analysisImg/"):
+    def __init__(self, img_path : str = "../analysisImg/"):
         self.img_path = img_path
         os.makedirs(self.img_path, exist_ok=True) 
 
@@ -20,41 +20,34 @@ class Graphics:
         if not os.path.exists(f'{self.img_path}{file_name}'):
             fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(6, 6))
             #Realizamos la grafica de distribución de la etiqueta
-            sns.distplot(
-                        df[target_col],
-                        hist    = False,
-                        rug     = True,
-                        color   = "blue",
-                        kde_kws = {'fill': True, 'linewidth': 1},
-                        ax      = axes[0]
-                    )
-            axes[0].set_title("Distribución original", fontsize = 'medium')
-            axes[0].set_xlabel('{target_col}', fontsize='small') 
-            axes[0].tick_params(labelsize = 6)
+          
+            # Realizamos la grafica de distribución de la etiqueta
+            sns.kdeplot(
+                df[target_col],
+                color="blue",
+                ax=axes[0],
+            )
+            axes[0].set_title("Distribución original", fontsize='medium')
+            axes[0].set_xlabel(target_col, fontsize='small')
+            axes[0].tick_params(labelsize=6)
 
-            sns.distplot(
+            sns.kdeplot(
                 np.sqrt(df[target_col]),
-                hist    = False,
-                rug     = True,
-                color   = "blue",
-                kde_kws = {'fill': True, 'linewidth': 1},
-                ax      = axes[1]
+                color="blue",
+                ax=axes[1],
             )
-            axes[1].set_title("Transformación raíz cuadrada", fontsize = 'medium')
-            axes[1].set_xlabel('sqrt({target_col})', fontsize='small') 
-            axes[1].tick_params(labelsize = 6)
+            axes[1].set_title("Transformación raíz cuadrada", fontsize='medium')
+            axes[1].set_xlabel(f'sqrt({target_col})', fontsize='small')
+            axes[1].tick_params(labelsize=6)
 
-            sns.distplot(
+            sns.kdeplot(
                 np.log(df[target_col]),
-                hist    = False,
-                rug     = True,
-                color   = "blue",
-                kde_kws = {'fill': True, 'linewidth': 1},
-                ax      = axes[2]
+                color="blue",
+                ax=axes[2],
             )
-            axes[2].set_title("Transformación logarítmica", fontsize = 'medium')
-            axes[2].set_xlabel(f'log({target_col})', fontsize='small') 
-            axes[2].tick_params(labelsize = 6)
+            axes[2].set_title("Transformación logarítmica", fontsize='medium')
+            axes[2].set_xlabel(f'log({target_col})', fontsize='small')
+            axes[2].tick_params(labelsize=6)
 
             fig.tight_layout()
 
@@ -150,6 +143,44 @@ class Graphics:
 
         else:
             print(f"[INFO] La imagen {file_name} ya existe")
+    def createAndSaveBoxPlot2(self, df: pd.DataFrame, file_name: str, target_col: str = 'Price', columns: list = None):
+        """Crea graficos boxplot de todos las dimensiones de df con tipo ['object', 'uint8'] y las guarda en la ruta img_path,
+        si se le pasa una lista con dimensiones del df unicamente graficará dicha lista si se le pasa columns por parámetro
+        graficará dichas columnas en base al target_col
+        :param df: Dataframe
+        :param file_name: Nombre y extension del archivo
+        :param target_col: nombre de la columna etiqueta, por defecto el Price
+        :param columns: por defecto None, lo cual implica que grafica todos las dimensiones del df,
+        se puede pasar una lista con las columnas que se desea graficar """
+        print('[INFO] Creando imagen gráfica...')
+        if not os.path.exists(f'{self.img_path}{file_name}'):
+            object_columns = df.select_dtypes(include=['object']).columns
+            uint8_columns = df.select_dtypes(include=['uint8']).columns
+            #uint8_columns = uint8_columns[~uint8_columns.str.contains('_NO$')]
+            object_axes = list(zip(object_columns, np.ravel(self.axes[:len(object_columns)])))
+            uint8_axes = list(zip(uint8_columns, np.ravel(self.axes[len(object_columns):len(object_columns) + len(uint8_columns)])))
+            size = math.ceil(len(object_columns + uint8_columns) / 2)
+            fig, axes = plt.subplots(nrows=size, ncols=2, figsize=(16, 6 * size))
+            fig.suptitle('Distribución del precio por variable categórica', va='top', y=1, fontsize=18)
+            for col, ax in object_axes:
+                sns.boxplot(data=df,
+                            x=target_col,
+                            y=col,
+                            width=0.7,
+                            ax=ax)
+                ax.set_title(f"{col}", fontsize=12)
+                ax.tick_params(labelsize=10)
+                ax.set_xlabel("")
+                ax.set_ylabel("")
+            for col, ax in uint8_axes:
+                sns.boxplot(data=df,
+                            x=col,
+                            y=target_col,
+                            width=0.7,
+                            ax=ax)
+                ax.set_title(f"{col[:-3]} (NO=0 SI=1)", fontsize=12)
+                ax.tick_params(labelsize=10)
+                ax.set_xlabel("")
 
     def createAndSaveBoxPlot(self, df: pd.DataFrame, file_name : str, target_col: str= 'Price', columns:list = None):
         """Crea graficos boxplot de todos las dimensiones de df con tipo ['object', 'uint8'] y las guarda en la ruta img_path, si se le pasa una lista con 
@@ -162,37 +193,43 @@ class Graphics:
         print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             object_columns= df[columns].columns if columns else df.select_dtypes(include=['object', 'uint8']).columns
-    #Para realizar una buena visualizacion de los dummies vamos a eliminar del conteo para las filas los dummies que representan los SI
-            columns_to_drop = [col for col in object_columns if ("_NO") in col]  
-            object_columns = object_columns.drop(columns_to_drop) if columns_to_drop else  object_columns
-            size= math.ceil(len(object_columns)/2)
+            #Para realizar una buena visualizacion de los dummies vamos a eliminar del conteo para las filas los dummies que representan los SI
+            #columns_to_drop = [col for col in object_columns if ("_NO") in col]  
+            #object_columns = object_columns.drop(columns_to_drop) if columns_to_drop else  object_columns
+
+            object_columns = df.select_dtypes(include=['object']).columns
+            uint8_columns = df.select_dtypes(include=['uint8']).columns
+            object_axes = list(zip(object_columns, range(0,len(object_columns))))
+            uint8_axes = list(zip(uint8_columns, range(len(object_columns),len(object_columns)+len(uint8_columns))))
+            size= math.ceil((len(object_columns)+len(uint8_columns))/2)
             fig, axes= plt.subplots(nrows=size, ncols=2, figsize=(16, 6*size))
             axes = axes.flat
             fig.suptitle('Distribución del precio por variable categórica',va='top', y= 1,fontsize = 18)
-            for i, col in enumerate(object_columns):
-                if df[col].dtypes == 'object':  
-                    sns.boxplot(data= df,
-                                x           = 'Price',
-                                y           = col,
-                                width       = 0.7,
-                                ax          = axes[i]
-                        )
-                    axes[i].set_title(f"{col}", fontsize = 12)
-                    axes[i].tick_params(labelsize = 10)
-                    axes[i].set_xlabel("")
-                    axes[i].set_ylabel("")    
-                    
-                if df[col].dtypes == 'uint8':            
-                    sns.boxplot(data= df,
-                                x           = col,
-                                y           = 'Price',
-                                width       = 0.7,
-                                ax          = axes[i]
-                        )
-                    axes[i].set_title(f"{col[:-3]} (NO=0 SI=1)", fontsize = 12)
-                    axes[i].tick_params(labelsize = 10)
-                    axes[i].set_xlabel("")
-                    axes[i].set_ylabel("")               
+            for col, ax in object_axes:
+                
+                sns.boxplot(data= df,
+                            x           = target_col,
+                            y           = col,
+                            width       = 0.7,
+                            ax          = axes[ax]
+                    )
+                axes[ax].set_title(f"{col}", fontsize = 12)
+                axes[ax].tick_params(labelsize = 10)
+                axes[ax].set_xlabel("")
+                axes[ax].set_ylabel("")    
+
+            for col, ax in uint8_axes:        
+                          
+                sns.boxplot(data= df,
+                            x           = col,
+                            y           = target_col,
+                            width       = 0.7,
+                            ax          = axes[ax]
+                    )
+                axes[ax].set_title(f"{col[:-3]} (NO=0 SI=1)", fontsize = 12)
+                axes[ax].tick_params(labelsize = 10)
+                axes[ax].set_xlabel("")
+                axes[ax].set_ylabel("")               
             
             fig.tight_layout()
             #Borramos los subplots que queden vacios
@@ -287,13 +324,13 @@ class Graphics:
 
 
 
-airbnb = pd.read_csv("../data/raw/airbnb-listings-extract.csv", sep=";")
-prueba = Graphics()
+#airbnb = pd.read_csv("../data/raw/airbnb-listings-extract.csv", sep=";")
+#prueba = Graphics()
 #prueba.createAndSaveScatter(airbnb, file_name='numericscatter9.png',target_col = 'Availability 30', columns=['Availability 60'])
 #prueba.createAndSaveTargetDistribution(df = airbnb, file_name = 'pricehistogram06.png')
 #prueba.createAndSaveTargetDistribution(df = airbnb, target_col = 'Price', file_name='Prueba.png')
 #prueba.createAndSaveHistogram(df= airbnb, target_col='Price' ,file_name='prueba8.png',columns=['Bedrooms', 'Bathrooms'])
 #prueba.createAndSaveScatter(df= airbnb, target_col='Price' ,file_name='prueba6.png',columns=['Bedrooms', 'Bathrooms'])
 #prueba.createAndSaveBoxPlot(df= airbnb, file_name='prueba15.png')
-prueba.createAndSaveScatter(df = airbnb, file_name='numericscatter5.png',target_col = 'Availability 30', columns=['Availability 60'])
+#prueba.createAndSaveScatter(df = airbnb, file_name='numericscatter5.png',target_col = 'Availability 30', columns=['Availability 60'])
 #airbnb.info()

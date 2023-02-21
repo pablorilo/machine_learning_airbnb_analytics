@@ -15,17 +15,18 @@ pd.set_option('display.max_colwidth', None)
 
 
 class PreprocessingDate(Graphics):
-    def __init__(self, df: pd.DataFrame, test = False , show_more_info: bool = True):
+    def __init__(self, df_train: pd.DataFrame, target_col:str = 'Price', show_more_info: bool = True):
         #Instanciamos la superclase de Graphics para tener acceso desde la clase 
         super().__init__()
-        self.df = df
+        self.df_train = df_train
         self.show_more_info = show_more_info
-        if test:
-            self.group = 'test'
-        else:
-            self.group = 'train'
-
-    def run(self, test = False)-> dict:
+        self.target_col = target_col
+        self.max_target = max(self.df_train[target_col])
+        self.scaler_code = None
+        self.mean_encoder = None
+        
+    def run(self, df: pd.DataFrame, test = False)-> dict:
+        self.df = df
         if test:
             colums_to_remove =['ID','Host ID','Listing Url','Scrape ID','Last Scraped','Neighbourhood Cleansed','Name','Summary','Space','Description','Experiences Offered','Neighborhood Overview','Notes','Transit',
                     'Access','Interaction','House Rules','Thumbnail Url','Medium Url','Picture Url','XL Picture Url','Host URL','Host Name','Host About', 'Host Response Rate',
@@ -34,16 +35,27 @@ class PreprocessingDate(Graphics):
                     'Host Neighbourhood','Host Response Time','Reviews per Month','First Review','Last Review','Review Scores Rating','Review Scores Accuracy','Review Scores Cleanliness',
                     'Review Scores Checkin','Review Scores Communication','Review Scores Location','Review Scores Value','Reviews per Month','Neighbourhood','Market','State','Zipcode',
                     'Smart Location','Country Code','Host Location','Host Listings Count','Host Total Listings Count','Host Since','City','Street','Guests Included','Number of Reviews',
-                    'Minimum Nights', 'Maximum Nights', 'Availability 30', 'Availability 60', 'Availability 90', 'Availability 365','Cleaning Fee'] 
+                    'Minimum Nights', 'Maximum Nights', 'Availability 30', 'Availability 60', 'Extra People','Availability 90', 'Availability 365','Cleaning Fee'] 
             self.df.drop(colums_to_remove, axis=1, inplace=True)
-            self.dummiesAndCategoricalTransformations()
             
+            self.dummiesAndCategoricalTransformations()
+            self.regroupLevels(column='Cancellation Policy',list_index = self.list_index_canc_Pol, name_new_group='strict')
+            self.regroupLevels(column='Property Type',list_index = self.list_index_prop)
+            self.regroupLevels(column='Bed Type',list_index = self.list_index_Bed)
+            self.df.dropna(inplace= True)
+            y_test = self.df[self.target_col]
+            x_test = self.df.drop(self.target_col,axis=1)
+            x_test.columns = x_test.columns.str.replace(' ', '_')
+
+            x_test = self.mean_encoder.transform(x_test)
+            
+
         else:
             #1--Indicamos los datos a cargar
-            self.printText(f'Preprocessing 1: Cargamos los datos de {self.group} para realizar el preprocesado del mismo')
+            self.printText(f'Preprocessing 1: Cargamos los datos de train para realizar el preprocesado del mismo')
             print('[INFO] Cargando datos...')
             #2--Eliminamos del df las columnas no relevantes
-            self.printText(f'Preprocessing 2: Eliminamos las columnas no relevantes, como url, fotos, descripciones... de df del grupo de {self.group}.')
+            self.printText(f'Preprocessing 2: Eliminamos las columnas no relevantes, como url, fotos, descripciones... de df del grupo de train.')
             print('[INFO] Eliminado columnas..\n.')
             colums_to_remove = ['ID','Host ID','Listing Url','Scrape ID','Last Scraped','Neighbourhood Cleansed','Name','Summary','Space','Description','Experiences Offered','Neighborhood Overview','Notes','Transit',
                 'Access','Interaction','House Rules','Thumbnail Url','Medium Url','Picture Url','XL Picture Url','Host URL','Host Name','Host About', 'Host Response Rate',
@@ -123,24 +135,24 @@ class PreprocessingDate(Graphics):
             print('Vamos a comprobar cuantos valores tienen los diferentes niveles de Cancelation Policy\n')
             print(self.df['Cancellation Policy'].value_counts())
             print('\n Reagrupamos los niveles que contienen sctric en uno solo.\n')
-            list_index_canc_Pol = self.df['Cancellation Policy'].value_counts().index[0:3] 
-            self.regroupLevels(column='Cancellation Policy',list_index = list_index_canc_Pol, name_new_group='strict')
+            self.list_index_canc_Pol = self.df['Cancellation Policy'].value_counts().index[0:3] 
+            self.regroupLevels(column='Cancellation Policy',list_index = self.list_index_canc_Pol, name_new_group='strict')
             print('\n Comprobamos la nueva reagrupación:\n')
             print(self.df['Cancellation Policy'].value_counts())
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora vamos a realizar lo mismo con los niveles de Property Type\n')
             print(self.df['Property Type'].value_counts())
             print('\n Reagrupamos los niveles manteniendo hasta loft y el resto los tipificamos como Other.\n')
-            list_index_prop = self.df['Property Type'].value_counts().index[0:5] 
-            self.regroupLevels(column='Property Type',list_index = list_index_prop)
+            self.list_index_prop = self.df['Property Type'].value_counts().index[0:5] 
+            self.regroupLevels(column='Property Type',list_index = self.list_index_prop)
             print('\n Comprobamos la nueva reagrupación:\n')
             print(self.df['Property Type'].value_counts())
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora es el turno de Bed Type\n')
             print(self.df['Bed Type'].value_counts())
             print('\n Reagrupamos los niveles manteniendo hasta loft y el resto los tipificamos como Other.\n')
-            list_index_Bed = self.df['Bed Type'].value_counts().index[0:2] 
-            self.regroupLevels(column='Bed Type',list_index = list_index_Bed)
+            self.list_index_Bed = self.df['Bed Type'].value_counts().index[0:2] 
+            self.regroupLevels(column='Bed Type',list_index = self.list_index_Bed)
             print('\n Comprobamos la nueva reagrupación:\n')
             print(self.df['Bed Type'].value_counts())
             print('\n-----------------------------------------------------------------------------------------\n')
@@ -150,29 +162,40 @@ class PreprocessingDate(Graphics):
             print('Ahora vamos a realizar la trasnformación de las variables '"Neighbourhood_Group_Cleansed"','"Property_Type"','"Room_Type"', '"Bed_Type"', '"Cancellation_Policy"', mediante MeanEncoder de la libreria Feature_engine.\n Vamos a visualizar que tipo de datos tenemos en este moment:\n')
             print(self.df.info())
             columns_to_mean =['Neighbourhood_Group_Cleansed','Property_Type','Room_Type', 'Bed_Type', 'Cancellation_Policy']
-            x_train, y_train = self.meanEncoder(columns_to_mean= columns_to_mean )
-            max_price = max(max_price)
+            x_train, y_train,self.mean_encoder = self.meanEncoder(columns_to_mean= columns_to_mean )
+            
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora vamos a volver a visualizar los datos en gráficos')
             print('Visualizamos gráficos boxplot de las variables categoricas\n')
-            self.createAndSaveBoxPlot(df=self.df,file_name='boxplot2.png')
+            #self.createAndSaveBoxPlot(df=self.df,file_name='boxplot2.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos gráficos scatter respecto a la variable objetivo\n')
-            self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png')
+            #self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos matriz de correlacion de todas las dimensiones\n')
-            self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png') 
+            #self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png') 
             print('\n-----------------------------------------------------------------------------------------\n')
 
             #5--Escalado de los datos. Mediante la libreria StandarScaler de sklearn 
-            
-            self.printText('Preprocesing 3: Escalado de los datos.')
+            print(x_train.columns)
+            self.printText('Preprocesing 5: Escalado de los datos.')
             print('\n-----------------------------------------------------------------------------------------\n')
-            
-            return {'df': self.df}
-            
-    def scalerDate(self, x:pd.DataFrame, y: pd.DataFrame):
-        pass
+            print('Mediante la funcion de sklearn StandarScaler nomrmalizamos el set x, encambio para y dividimos entre su valor max')
+            #normalizamos la y dividiendo entre su maximo
+            X_train_norm , y_train_norm = self.scaler(x=x_train,y=y_train)
+            data_dict = {'X_train':x_train,'X_train_norm':X_train_norm,'y_train':y_train,'y_train_norm':y_train_norm}
+            print(x_train.columns)
+            return data_dict
+                      
+    def scaler(self, x:pd.DataFrame, y :pd.DataFrame):
+        #normalizamos la y dividiendo entre su maximo
+        y_norm =  y / self.max_target
+        #normalizamos la x con standarscaler
+        self.scaler = StandardScaler()
+        self.scaler.fit(x)
+        X_norm = self.scaler.transform(x)
+        return   X_norm, y_norm
+
 
     def meanEncoder(self, columns_to_mean:list, target_col: str = 'Price'):
         """Función que realiza la codificación de las variables categoricas con la media de la variable buscada y devuelve el set ya dividio en x \
@@ -184,11 +207,10 @@ class PreprocessingDate(Graphics):
         self.df.columns = self.df.columns.str.replace(' ', '_')
         y_train = self.df[target_col]
         x_train = self.df.drop(target_col,axis =1)
-        x_train_names_col = self.df.columns
         #Creamos la instancia de meanEncoder
-        main_encoder_categorical = MeanEncoder(variables=columns_to_mean).fit(x_train, y_train)
-        x_train = main_encoder_categorical.transform(x_train)
-        return x_train, y_train        
+        self.mean_encoder = MeanEncoder(variables=columns_to_mean).fit(x_train, y_train)
+        x_train = self.mean_encoder.transform(x_train)
+        return x_train, y_train, self.mean_encoder       
 
 
 
@@ -213,5 +235,5 @@ class PreprocessingDate(Graphics):
         self.df['Air conditioning'] = np.where(condition_air, 'SI','NO')
         #Trasnforma las 3 columnas anteriores a dummies
         self.df = pd.get_dummies(self.df,prefix=['A/C','Heat','Sec_Dep'],columns=['Air conditioning','Heating','Security Deposit'])
-        return self.df.drop('Amenities', axis=1)
+        self.df.drop('Amenities', axis=1, inplace=True)
         
