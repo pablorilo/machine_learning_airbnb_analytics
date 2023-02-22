@@ -46,7 +46,6 @@ class PreprocessingDate(Graphics):
             y_test = self.df[self.target_col]
             x_test = self.df.drop(self.target_col,axis=1)
             x_test.columns = x_test.columns.str.replace(' ', '_')
-
             x_test = self.mean_encoder.transform(x_test)
             
 
