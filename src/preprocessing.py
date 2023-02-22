@@ -28,6 +28,8 @@ class PreprocessingDate(Graphics):
     def run(self, df: pd.DataFrame, test = False)-> dict:
         self.df = df
         if test:
+            self.printText(f'Preprocessing 6: Realizamos la misma limpieza al set de test')           
+
             colums_to_remove =['ID','Host ID','Listing Url','Scrape ID','Last Scraped','Neighbourhood Cleansed','Name','Summary','Space','Description','Experiences Offered','Neighborhood Overview','Notes','Transit',
                     'Access','Interaction','House Rules','Thumbnail Url','Medium Url','Picture Url','XL Picture Url','Host URL','Host Name','Host About', 'Host Response Rate',
                     'Calculated host listings count','Host Thumbnail Url','Host Picture Url','Host Verifications','Features','Square Feet','Host Acceptance Rate','Has Availability',
@@ -47,8 +49,15 @@ class PreprocessingDate(Graphics):
             x_test = self.df.drop(self.target_col,axis=1)
             x_test.columns = x_test.columns.str.replace(' ', '_')
             x_test = self.mean_encoder.transform(x_test)
-            
 
+            # Preprocesing 7 -- Realizamos el escalado de los datos de test con los datos de train
+            self.printText('Preprocesing 7 : Escalado de los datos de test con los datos de train.')
+            print('[INFO] Realizando escalado...')
+            y_test_norm = y_test / self.max_target
+            x_test_norm = self.scaler.transform(x_test)
+            data_dict = {'x_test':x_test,'x_test_norm':x_test_norm,'y_test':y_test,'y_test_norm':y_test_norm}
+            return data_dict        
+            
         else:
             #1--Indicamos los datos a cargar
             self.printText(f'Preprocessing 1: Cargamos los datos de train para realizar el preprocesado del mismo')
@@ -71,16 +80,16 @@ class PreprocessingDate(Graphics):
 
             #3--Variables Numéricas. Mediante la clase Graphics generamos diferentes graficos de distribución de las variables 
             ##Graficamos##
-            self.printText('Preprocesing 3: Estudio de variables numéricas.')
+            #self.printText('Preprocesing 3: Estudio de variables numéricas.')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos su distribución\n')
-            self.createAndSaveHistogram(df = self.df, file_name='numerichistogram2.png')
+            #self.createAndSaveHistogram(df = self.df, file_name='numerichistogram2.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos gráficos scatter respecto a la variable objetivo\n')
-            self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png')
+            #self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos matriz de correlacion de todas las dimensiones\n')
-            self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png')  
+            #self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png')  
             print('\n-----------------------------------------------------------------------------------------\n') 
             print('Tras visualizar los scatterplot observamos que hay variables que a priori se relacionan bastante con el precio, como pueden ser Accommodates, Bathrooms, Bedrooms, beds, Cleaning Fee y Extra People. En las siguientes celdas vamos a analizar un poco más a fondo las dos últimas dimensiones mencionadas. Además también observamos que Minimum Nights y Maximum Nights en principio aportarían poco al modelo por lo tanto las vamos a eliminar. Además vamos a eliminar las dimensiones de Availability por que tampoco parece que tengan una fuerte relación con el precio y están muy correladas entre si')     
             print('\Visualizamos la grafica Scatter de como se correlacionan los Availability\n')
@@ -156,7 +165,7 @@ class PreprocessingDate(Graphics):
             print(self.df['Bed Type'].value_counts())
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos como se distribuye en la variable objetivo por categorias')
-            self.createAndSaveBoxPlot(df=self.df,file_name='boxplot1.png')
+            #self.createAndSaveBoxPlot(df=self.df,file_name='boxplot1.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora vamos a realizar la trasnformación de las variables '"Neighbourhood_Group_Cleansed"','"Property_Type"','"Room_Type"', '"Bed_Type"', '"Cancellation_Policy"', mediante MeanEncoder de la libreria Feature_engine.\n Vamos a visualizar que tipo de datos tenemos en este moment:\n')
             print(self.df.info())
@@ -175,15 +184,14 @@ class PreprocessingDate(Graphics):
             #self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png') 
             print('\n-----------------------------------------------------------------------------------------\n')
 
-            #5--Escalado de los datos. Mediante la libreria StandarScaler de sklearn 
-            print(x_train.columns)
+            #5--Escalado de los datos. Mediante la libreria StandarScaler de sklearn           
             self.printText('Preprocesing 5: Escalado de los datos.')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Mediante la funcion de sklearn StandarScaler nomrmalizamos el set x, encambio para y dividimos entre su valor max')
             #normalizamos la y dividiendo entre su maximo
-            X_train_norm , y_train_norm = self.scaler(x=x_train,y=y_train)
-            data_dict = {'X_train':x_train,'X_train_norm':X_train_norm,'y_train':y_train,'y_train_norm':y_train_norm}
-            print(x_train.columns)
+            x_train_norm , y_train_norm = self.scaler(x=x_train,y=y_train)
+            data_dict = {'x_train':x_train,'x_train_norm':x_train_norm,'y_train':y_train,'y_train_norm':y_train_norm}
+            
             return data_dict
                       
     def scaler(self, x:pd.DataFrame, y :pd.DataFrame):
