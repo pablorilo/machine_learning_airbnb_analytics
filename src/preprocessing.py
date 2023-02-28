@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from feature_engine.encoding import MeanEncoder
-
 from sklearn.preprocessing import StandardScaler
+from feature_engine.encoding import MeanEncoder
 
 # Importamos nuestro modeulo para graficar
 from graphics import Graphics
@@ -55,6 +54,8 @@ class PreprocessingDate(Graphics):
             print('[INFO] Realizando escalado...')
             y_test_norm = y_test / self.max_target
             x_test_norm = self.scaler.transform(x_test)
+            x_test_norm = pd.DataFrame(data= x_test_norm, columns= x_test.columns)
+            #x_test_norm = pd.DataFrame(x_test_norm, columns=x_test.columns)
             data_dict = {'x_test':x_test,'x_test_norm':x_test_norm,'y_test':y_test,'y_test_norm':y_test_norm}
             return data_dict        
             
@@ -171,7 +172,7 @@ class PreprocessingDate(Graphics):
             print(self.df.info())
             columns_to_mean =['Neighbourhood_Group_Cleansed','Property_Type','Room_Type', 'Bed_Type', 'Cancellation_Policy']
             x_train, y_train,self.mean_encoder = self.meanEncoder(columns_to_mean= columns_to_mean )
-            
+            features = x_train.columns
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora vamos a volver a visualizar los datos en gráficos')
             print('Visualizamos gráficos boxplot de las variables categoricas\n')
@@ -189,7 +190,9 @@ class PreprocessingDate(Graphics):
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Mediante la funcion de sklearn StandarScaler nomrmalizamos el set x, encambio para y dividimos entre su valor max')
             #normalizamos la y dividiendo entre su maximo
+            features = x_train.columns
             x_train_norm , y_train_norm = self.scaler(x=x_train,y=y_train)
+            x_train_norm = pd.DataFrame(data= x_train_norm, columns= features)
             data_dict = {'x_train':x_train,'x_train_norm':x_train_norm,'y_train':y_train,'y_train_norm':y_train_norm}
             
             return data_dict
@@ -197,10 +200,11 @@ class PreprocessingDate(Graphics):
     def scaler(self, x:pd.DataFrame, y :pd.DataFrame):
         #normalizamos la y dividiendo entre su maximo
         y_norm =  y / self.max_target
-        #normalizamos la x con standarscaler
+        #normalizamos la x con standarscaler        
         self.scaler = StandardScaler()
         self.scaler.fit(x)
         X_norm = self.scaler.transform(x)
+        
         return   X_norm, y_norm
 
 

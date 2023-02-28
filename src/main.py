@@ -4,7 +4,7 @@ from data import AnalysisDate
 from preprocessing import PreprocessingDate
 from modeling import Modeling
 
-print('hola')
+
 if __name__ == '__main__':
     def run():        
         # -- 0: Variables de control
@@ -22,9 +22,10 @@ if __name__ == '__main__':
         data_dict = {}
         data_dict.update(preprocesing_dict_train)
         data_dict.update(preprocesing_dict_test)
-        print(data_dict.keys())
+        
         Modeling(data_dict=data_dict).run(method='LINEAR')
         Modeling(data_dict=data_dict).run(method='RIDGE')
+        Modeling(data_dict=data_dict).run(method='LASSO')
 
 
 
