@@ -63,6 +63,7 @@ class Modeling(Graphics):
                 break
 
             iter_security_lock += 1
+        print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
         self.createAndSaveModelsCompare(models = df_score, file_name ='regresionmodelsCompare.png')
         
     def linearInfo(self, x_train: np.array, y_train: np.array, x_test: np.array, y_test: np.array): 
@@ -135,10 +136,12 @@ class Modeling(Graphics):
                 break
 
             iter_security_lock += 1
+        print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
         self.createAndSaveModelsCompare(models = df_score, file_name ='ridgemodelsCompare.png')
 
     def ridgeGridSearchCV(self, x_train: np.array, y_train: np.array, logspace=np.logspace(-5, 1.8, 25),
                           cv_number: int = 5):
+        print('[INFO] Realizando cross validation ...')
         alpha_vector = logspace
         param_grid = {'alpha': alpha_vector}
         grid = GridSearchCV(Ridge(), scoring='neg_mean_squared_error', param_grid=param_grid, cv=cv_number)
@@ -147,6 +150,7 @@ class Modeling(Graphics):
         print("best parameters: {}".format(grid.best_params_))
 
         scores = -1 * np.array(grid.cv_results_['mean_test_score'])
+        print('Generamos gráfica de comparación de grid\n')
         self.createAndSaveplotGridValues(vector= alpha_vector, scores= scores, file_name= f"AlphaRidge{x_train.shape[1]}.png", metric= 'Alpha', n_folds= 5, x_label= 'Alpha')
 
         # Devolvemos el mejor aplpha
@@ -222,10 +226,12 @@ class Modeling(Graphics):
                 break
 
             iter_security_lock += 1
+        print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
         self.createAndSaveModelsCompare(models = df_score, file_name ='lassomodelsCompare.png')
 
     def lassoGridSearchCV(self, X_train: np.array, y_train: np.array, logspace=np.logspace(-5, 1.8, 25),
                           cv_number: int = 5):
+        print('[INFO] Realizando cross validation ...')
         alpha_vector = logspace
         param_grid = {'alpha': alpha_vector}
         grid = GridSearchCV(Lasso(), scoring='neg_mean_squared_error', param_grid=param_grid, cv=cv_number)
@@ -234,6 +240,7 @@ class Modeling(Graphics):
         print("best parameters: {}".format(grid.best_params_))
 
         scores = -1 * np.array(grid.cv_results_['mean_test_score'])
+        print('Generamos gráfica de comparación de grid\n')
         self.createAndSaveplotGridValues(vector= alpha_vector, scores= scores, file_name= f"AlphaLasso{X_train.shape[1]}.png", metric= 'Alpha', n_folds= 5, x_label= 'Alpha')
 
         # Devolvemos el mejor aplpha
@@ -310,10 +317,11 @@ class Modeling(Graphics):
                 break
 
             iter_security_lock += 1
+        print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
         self.createAndSaveModelsCompare(models = df_score, file_name ='randommodelsCompare.png')
 
     def randomForestGridSearchCV(self, X_train: np.array, y_train: np.array, maxDepth=range(1, 18), cv_number: int = 5):
-
+        print('[INFO] Realizando cross validation ...')
         param_grid = {'max_depth': maxDepth}
         grid = GridSearchCV(RandomForestRegressor(random_state=0, n_estimators=200, max_features='sqrt'),
                             param_grid=param_grid, cv=cv_number, verbose=2)
@@ -322,6 +330,7 @@ class Modeling(Graphics):
         print("best parameters: {}".format(grid.best_params_))
 
         scores = np.array(grid.cv_results_['mean_test_score'])
+        print('Generamos gráfica de comparación de grid\n')
         self.createAndSaveplotGridValues(vector= maxDepth, scores= scores, file_name= f"randomforest{X_train.shape[1]}.png", metric= 'Max_depth', n_folds= 5, x_label= 'Alpha')
 
         # Devolvemos el mejor depth
