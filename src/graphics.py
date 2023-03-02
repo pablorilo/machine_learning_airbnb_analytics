@@ -195,7 +195,7 @@ class Graphics:
                         se puede pasar una lista con las columnas que se desea graficar """ 
         print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
-            plt.rcParams['font.family'] = 'Arial Unicode MS'
+            
             if columns:
                 object_columns = df[columns].select_dtypes(include=['object']).columns
                 uint8_columns = df[columns].select_dtypes(include=['uint8']).columns
@@ -319,13 +319,3 @@ class Graphics:
 
 
 
-airbnb = pd.read_csv("../data/raw/airbnb-listings-extract.csv", sep=";")
-prueba = Graphics()
-#prueba.createAndSaveCategoricalDistribution(airbnb, file_name='numericscatter999.png',columns=['Neighbourhood Group Cleansed','Property Type','Room Type','Bed Type','Cancellation Policy'])
-#prueba.createAndSaveTargetDistribution(df = airbnb, file_name = 'pricehistogram06.png')
-#prueba.createAndSaveTargetDistribution(df = airbnb, target_col = 'Price', file_name='Prueba.png')
-#prueba.createAndSaveHistogram(df= airbnb, target_col='Price' ,file_name='prueba8.png',columns=['Bedrooms', 'Bathrooms'])
-#prueba.createAndSaveScatter(df= airbnb, target_col='Price' ,file_name='prueba6.png',columns=['Bedrooms', 'Bathrooms'])
-prueba.createAndSaveViolinPlot(df= airbnb, file_name='prueba15.png',columns=['Country', 'Property Type', 'Room Type', 'Bed Type'])
-#prueba.createAndSaveScatter(df = airbnb, file_name='numericscatter5.png',target_col = 'Availability 30', columns=['Availability 60'])
-#airbnb.info()
