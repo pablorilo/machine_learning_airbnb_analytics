@@ -1,6 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import matplotlib.ticker as ticker
 import os
 import pandas as pd
 import numpy as np
@@ -144,104 +145,7 @@ class Graphics:
 
         else:
             print(f"[INFO] La imagen {file_name} ya existe")
-    def createAndSaveBoxPlot2(self, df: pd.DataFrame, file_name: str, target_col: str = 'Price', columns: list = None):
-        """Crea graficos boxplot de todos las dimensiones de df con tipo ['object', 'uint8'] y las guarda en la ruta img_path,
-        si se le pasa una lista con dimensiones del df unicamente graficará dicha lista si se le pasa columns por parámetro
-        graficará dichas columnas en base al target_col
-        :param df: Dataframe
-        :param file_name: Nombre y extension del archivo
-        :param target_col: nombre de la columna etiqueta, por defecto el Price
-        :param columns: por defecto None, lo cual implica que grafica todos las dimensiones del df,
-        se puede pasar una lista con las columnas que se desea graficar """
-        print('[INFO] Creando imagen gráfica...')
-        if not os.path.exists(f'{self.img_path}{file_name}'):
-            object_columns = df.select_dtypes(include=['object']).columns
-            uint8_columns = df.select_dtypes(include=['uint8']).columns
-            #uint8_columns = uint8_columns[~uint8_columns.str.contains('_NO$')]
-            object_axes = list(zip(object_columns, np.ravel(self.axes[:len(object_columns)])))
-            uint8_axes = list(zip(uint8_columns, np.ravel(self.axes[len(object_columns):len(object_columns) + len(uint8_columns)])))
-            size = math.ceil(len(object_columns + uint8_columns) / 2)
-            fig, axes = plt.subplots(nrows=size, ncols=2, figsize=(16, 6 * size))
-            fig.suptitle('Distribución del precio por variable categórica', va='top', y=1, fontsize=18)
-            for col, ax in object_axes:
-                sns.boxplot(data=df,
-                            x=target_col,
-                            y=col,
-                            width=0.7,
-                            ax=ax)
-                ax.set_title(f"{col}", fontsize=12)
-                ax.tick_params(labelsize=10)
-                ax.set_xlabel("")
-                ax.set_ylabel("")
-            for col, ax in uint8_axes:
-                sns.boxplot(data=df,
-                            x=col,
-                            y=target_col,
-                            width=0.7,
-                            ax=ax)
-                ax.set_title(f"{col[:-3]} (NO=0 SI=1)", fontsize=12)
-                ax.tick_params(labelsize=10)
-                ax.set_xlabel("")
-
-    def createAndSaveBoxPlot(self, df: pd.DataFrame, file_name : str, target_col: str= 'Price', columns:list = None):
-        """Crea graficos boxplot de todos las dimensiones de df con tipo ['object', 'uint8'] y las guarda en la ruta img_path, si se le pasa una lista con 
-            dimensiones del df unicamente graficará dicha lista si se le pasa columns por parámetro graficará dichas columnas en base al target_col
-        :param df: Dataframe
-        :param file_name: Nombre y extension del archivo
-        :param target_col: nombre de la columna etiqueta, por defecto el Price
-        :param columns: por defecto None, lo cual implica que grafica todos las dimensiones del df, 
-                        se puede pasar una lista con las columnas que se desea graficar """ 
-        print('[INFO] Creando imagen gráfica...')
-        if not os.path.exists(f'{self.img_path}{file_name}'):
-            object_columns= df[columns].columns if columns else df.select_dtypes(include=['object', 'uint8']).columns
-            #Para realizar una buena visualizacion de los dummies vamos a eliminar del conteo para las filas los dummies que representan los SI
-            #columns_to_drop = [col for col in object_columns if ("_NO") in col]  
-            #object_columns = object_columns.drop(columns_to_drop) if columns_to_drop else  object_columns
-
-            object_columns = df.select_dtypes(include=['object']).columns
-            uint8_columns = df.select_dtypes(include=['uint8']).columns
-            object_axes = list(zip(object_columns, range(0,len(object_columns))))
-            uint8_axes = list(zip(uint8_columns, range(len(object_columns),len(object_columns)+len(uint8_columns))))
-            size= math.ceil((len(object_columns)+len(uint8_columns))/2)
-            fig, axes= plt.subplots(nrows=size, ncols=2, figsize=(16, 6*size))
-            axes = axes.flat
-            fig.suptitle('Distribución del precio por variable categórica',va='top', y= 1,fontsize = 18)
-            for col, ax in object_axes:
-                
-                sns.boxplot(data= df,
-                            x           = target_col,
-                            y           = col,
-                            width       = 0.7,
-                            ax          = axes[ax]
-                    )
-                axes[ax].set_title(f"{col}", fontsize = 12)
-                axes[ax].tick_params(labelsize = 10)
-                axes[ax].set_xlabel("")
-                axes[ax].set_ylabel("")    
-
-            for col, ax in uint8_axes:        
-                          
-                sns.boxplot(data= df,
-                            x           = col,
-                            y           = target_col,
-                            width       = 0.7,
-                            ax          = axes[ax]
-                    )
-                axes[ax].set_title(f"{col[:-3]} (NO=0 SI=1)", fontsize = 12)
-                axes[ax].tick_params(labelsize = 10)
-                axes[ax].set_xlabel("")
-                axes[ax].set_ylabel("")               
-            
-            fig.tight_layout()
-            #Borramos los subplots que queden vacios
-            graf_del = size*2 - len(object_columns)
-            if graf_del == 1 :
-                fig.delaxes(axes[-1])
-            fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight")
-            print(f"{self.img_path}{file_name} creado correctamente")
-        else:
-            print(f"[INFO] La imagen {file_name} ya existe")
-
+   
     def createAndSaveCategoricalDistribution(self, df: pd.DataFrame, file_name : str, columns:list = None):
         mpl.rcParams['font.family'] = 'IPAexGothic'
         """Crea gráficos de como se distribuyen los datos en las variables categóricas y lo guarda como imagen
@@ -292,47 +196,58 @@ class Graphics:
         print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
             plt.rcParams['font.family'] = 'Arial Unicode MS'
-            object_columns= df[columns].columns if columns else df.select_dtypes(include=['object', 'uint8']).columns
-
-            object_columns = df.select_dtypes(include=['object']).columns
-            uint8_columns = df.select_dtypes(include=['uint8']).columns
+            if columns:
+                object_columns = df[columns].select_dtypes(include=['object']).columns
+                uint8_columns = df[columns].select_dtypes(include=['uint8']).columns
+            else:
+                object_columns = df.select_dtypes(include=['object']).columns
+                uint8_columns = df.select_dtypes(include=['uint8']).columns
             object_axes = list(zip(object_columns, range(0,len(object_columns))))
             uint8_axes = list(zip(uint8_columns, range(len(object_columns),len(object_columns)+len(uint8_columns))))
             size= math.ceil((len(object_columns)+len(uint8_columns))/2)
             fig, axes= plt.subplots(nrows=size, ncols=2, figsize=(16, 6*size))
             axes = axes.flat
             fig.suptitle('Distribución del precio por variable categórica',va='top', y= 1,fontsize = 18)
-            for col, ax in object_axes:
-                
-                sns.violinplot(data= df,
-                            x           = target_col,
-                            y           = col,
-                            ax          = axes[ax]
-                    )
-                axes[ax].set_title(f"{col}", fontsize = 12)
-                axes[ax].tick_params(labelsize = 10)
-                axes[ax].set_xlabel("")
-                axes[ax].set_ylabel("")    
+            print(len(axes))
+            print(len(object_axes))
+            print(len(uint8_axes))
+            for colum, i in object_axes:
+                print(i)
+                print(colum)
+                sns.violinplot(
+                    x     = colum,
+                    y     = target_col,
+                    data  = df,
+                    color = "white",
+                    ax    = axes[i]
+                )
+                axes[i].set_title(f"precio vs {colum}", fontsize = 7, fontweight = "bold")
+                axes[i].yaxis.set_major_formatter(ticker.EngFormatter())
+                axes[i].tick_params(labelsize = 6)
+                axes[i].set_xlabel("")
+                axes[i].set_ylabel("")
 
-            for col, ax in uint8_axes:        
-                        
-                sns.violinplot(data= df,
-                            x           = col,
-                            y           = target_col,
-                            ax          = axes[ax]
-                    )
-                axes[ax].set_title(f"{col[:-3]} (NO=0 SI=1)", fontsize = 12)
-                axes[ax].tick_params(labelsize = 10)
-                axes[ax].set_xlabel("")
-                axes[ax].set_ylabel("")               
-            
+            for colum, i in uint8_axes:
+                print(i)
+                print(colum)
+                sns.violinplot(
+                    x     = target_col,
+                    y     = colum,
+                    data  = df,
+                    color = "white",
+                    ax    = axes[i]
+                )
+                axes[i].set_title(f"precio vs {colum}", fontsize = 7, fontweight = "bold")
+                axes[i].yaxis.set_major_formatter(ticker.EngFormatter())
+                axes[i].tick_params(labelsize = 6)
+                axes[i].set_xlabel("")
+                axes[i].set_ylabel("")
             fig.tight_layout()
-            #Borramos los subplots que queden vacios
-            graf_del = size*2 - len(object_columns)
-            if graf_del == 1 :
-                fig.delaxes(axes[-1])
             fig.savefig(f"{self.img_path}{file_name}", bbox_inches="tight")
             print(f"{self.img_path}{file_name} creado correctamente")
+
+            
+            
         else:
             print(f"[INFO] La imagen {file_name} ya existe")  
 
@@ -404,13 +319,13 @@ class Graphics:
 
 
 
-#airbnb = pd.read_csv("../data/raw/airbnb-listings-extract.csv", sep=";")
-#prueba = Graphics()
+airbnb = pd.read_csv("../data/raw/airbnb-listings-extract.csv", sep=";")
+prueba = Graphics()
 #prueba.createAndSaveCategoricalDistribution(airbnb, file_name='numericscatter999.png',columns=['Neighbourhood Group Cleansed','Property Type','Room Type','Bed Type','Cancellation Policy'])
 #prueba.createAndSaveTargetDistribution(df = airbnb, file_name = 'pricehistogram06.png')
 #prueba.createAndSaveTargetDistribution(df = airbnb, target_col = 'Price', file_name='Prueba.png')
 #prueba.createAndSaveHistogram(df= airbnb, target_col='Price' ,file_name='prueba8.png',columns=['Bedrooms', 'Bathrooms'])
 #prueba.createAndSaveScatter(df= airbnb, target_col='Price' ,file_name='prueba6.png',columns=['Bedrooms', 'Bathrooms'])
-#prueba.createAndSaveViolinPlot(df= airbnb, file_name='prueba15.png')
+prueba.createAndSaveViolinPlot(df= airbnb, file_name='prueba15.png',columns=['Country', 'Property Type', 'Room Type', 'Bed Type'])
 #prueba.createAndSaveScatter(df = airbnb, file_name='numericscatter5.png',target_col = 'Availability 30', columns=['Availability 60'])
 #airbnb.info()
