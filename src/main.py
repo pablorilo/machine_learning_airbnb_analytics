@@ -26,6 +26,7 @@ if __name__ == '__main__':
         Modeling(data_dict=data_dict).run(method='LINEAR')
         Modeling(data_dict=data_dict).run(method='RIDGE')
         Modeling(data_dict=data_dict).run(method='LASSO')
+        Modeling(data_dict=data_dict).run(method='FOREST')
 
 
 

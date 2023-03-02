@@ -375,6 +375,27 @@ class Graphics:
         else:
             print(f"[INFO] La imagen {file_name} ya existe")
 
+    def createAndSaveModelsCompare(self, models: pd.DataFrame, file_name: str) -> None:
+        """"""
+        print('[INFO] Creando imagen gráfica...')
+        if not os.path.exists(f'{self.img_path}{file_name}'):
+            metrics = [metric for metric in models.columns if metric != 'model']
+            fig, axes= plt.subplots(nrows=3, ncols=2, figsize=(16, 12))
+            axes = axes.flat
+            fig.suptitle('Comparación de modelos',va='top', y= 1,fontsize = 18)
+            for i, metric in enumerate(metrics):
+                 sns.barplot(x=models[metric], y=models['model'], palette='Reds', ax=axes[i])
+                 axes[i].tick_params(labelsize = 10)
+                 axes[i].set_xlabel(f'Test {metric}', fontsize=12)
+                 axes[i].set_ylabel('Modelos', fontsize=12)
+                 axes[i].set_title(f'Comparación de {metric} de test modelos', fontsize=14)
+            fig.tight_layout()
+            plt.savefig(f"{self.img_path}{file_name}")
+            print(f"{self.img_path}{file_name} creado correctamente")         
+
+        else:
+            print(f"[INFO] La imagen {file_name} ya existe")
+
     @staticmethod
     def printText(text_to_print: str):
         print(f'\n#############################################################################################################################\n'
