@@ -208,12 +208,8 @@ class Graphics:
             fig, axes= plt.subplots(nrows=size, ncols=2, figsize=(16, 6*size))
             axes = axes.flat
             fig.suptitle('Distribución del precio por variable categórica',va='top', y= 1,fontsize = 18)
-            print(len(axes))
-            print(len(object_axes))
-            print(len(uint8_axes))
+            
             for colum, i in object_axes:
-                print(i)
-                print(colum)
                 sns.violinplot(
                     x     = colum,
                     y     = target_col,
