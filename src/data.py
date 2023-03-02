@@ -32,7 +32,7 @@ class AnalysisDate(Graphics):
         
         #3--Comprobamos como se distribuye la variable buscada de forma original, su raiz cuadrada y logaritmica
         self.printText('Analysis 3: Vamos a ver como se distribuye la variable buscada mediante gráficas de densidad de probabilidad')
-        self.createAndSaveTargetDistribution(df = train, file_name = 'pricehistogram02.png')
+        self.createAndSaveTargetDistribution(df = train, file_name = 'pricehistogram.png')
 
         #4--Realizamos un análisis exploratorio de los datos
         self.printText('Analysis 4: Vamos a ver que tipos de datos tenemos y un poco de información sobre ellos')

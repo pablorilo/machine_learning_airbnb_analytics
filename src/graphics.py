@@ -155,19 +155,19 @@ class Graphics:
                         se puede pasar una lista con las columnas que se desea graficar """
         print('[INFO] Creando imagen gráfica...')
         if not os.path.exists(f'{self.img_path}{file_name}'):
-            print(columns)
+           
             object_columns= df[columns].columns if columns else df.select_dtypes(include=['object']).columns
             num_plots = len(object_columns)
-            print(num_plots)
+            
             num_rows, num_cols = divmod(num_plots, 2)
             if num_cols != 0:
                 num_rows += 1
             fig, axes= plt.subplots(nrows=num_rows, ncols=2, figsize=(16, 6*num_rows))
             axes = axes.flat
             fig.suptitle('Distribución variables categóricas',fontsize = 18)
-            print(object_columns)
+            
             for i, colum in enumerate(object_columns):
-                print(i,colum)
+                
                 df[colum].value_counts().plot.barh(ax = axes[i])
                 axes[i].set_title(colum, fontsize = 12)
                 axes[i].tick_params(labelsize = 10)
@@ -224,8 +224,6 @@ class Graphics:
                 axes[i].set_ylabel("")
 
             for colum, i in uint8_axes:
-                print(i)
-                print(colum)
                 sns.violinplot(
                     x     = target_col,
                     y     = colum,

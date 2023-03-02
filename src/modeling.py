@@ -23,6 +23,8 @@ class Modeling(Graphics):
         #conjunto de test
         self.x_test_norm = data_dict['x_test_norm']
         self.y_test_norm = data_dict['y_test_norm']
+        #precio para desnormalizar la prediccion
+        self.max_target = data_dict['max_target']
         
     def run(self, method = str):
         """Dependiendo del método que se pase por parámetro se ejecutara el entrenamiento del mismo
@@ -64,7 +66,7 @@ class Modeling(Graphics):
 
             iter_security_lock += 1
         print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
-        self.createAndSaveModelsCompare(models = df_score, file_name ='regresionmodelsCompare.png')
+        self.createAndSaveModelsCompare(models = df_score, file_name ='regresionModelsCompare.png')
         
     def linearInfo(self, x_train: np.array, y_train: np.array, x_test: np.array, y_test: np.array): 
 
@@ -73,12 +75,12 @@ class Modeling(Graphics):
         linear.fit(x_train, y_train)
 
         y_pred_train = linear.predict(x_train)
-        mse_train = mean_squared_error(y_train, y_pred_train)
-        mae_train = mean_absolute_error(y_train, y_pred_train)
+        mse_train = mean_squared_error(y_train, y_pred_train)*self.max_target
+        mae_train = mean_absolute_error(y_train, y_pred_train)*self.max_target
 
         y_pred_test = linear.predict(x_test)
-        mse_test = mean_squared_error(y_test, y_pred_test)
-        mae_test = mean_absolute_error(y_test, y_pred_test)
+        mse_test = mean_squared_error(y_test, y_pred_test)*self.max_target
+        mae_test = mean_absolute_error(y_test, y_pred_test)*self.max_target
 
         r2_train = linear.score(x_train, y_train)
         r2_test = linear.score(x_test, y_test)
@@ -137,7 +139,7 @@ class Modeling(Graphics):
 
             iter_security_lock += 1
         print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
-        self.createAndSaveModelsCompare(models = df_score, file_name ='ridgemodelsCompare.png')
+        self.createAndSaveModelsCompare(models = df_score, file_name ='ridgeModelsCompare.png')
 
     def ridgeGridSearchCV(self, x_train: np.array, y_train: np.array, logspace=np.logspace(-5, 1.8, 25),
                           cv_number: int = 5):
@@ -151,7 +153,7 @@ class Modeling(Graphics):
 
         scores = -1 * np.array(grid.cv_results_['mean_test_score'])
         print('Generamos gráfica de comparación de grid\n')
-        self.createAndSaveplotGridValues(vector= alpha_vector, scores= scores, file_name= f"AlphaRidge{x_train.shape[1]}.png", metric= 'Alpha', n_folds= 5, x_label= 'Alpha')
+        self.createAndSaveplotGridValues(vector= alpha_vector, scores= scores, file_name= f"AlphaRidgegrid{x_train.shape[1]}.png", metric= 'Alpha', n_folds= 5, x_label= 'Alpha')
 
         # Devolvemos el mejor aplpha
         return grid.best_params_['alpha']
@@ -164,12 +166,12 @@ class Modeling(Graphics):
         ridge.fit(x_train, y_train)
 
         y_pred_train = ridge.predict(x_train)
-        mse_train = mean_squared_error(y_train, y_pred_train)
-        mae_train = mean_absolute_error(y_train, y_pred_train)
+        mse_train = mean_squared_error(y_train, y_pred_train)*self.max_target
+        mae_train = mean_absolute_error(y_train, y_pred_train)*self.max_target
 
         y_pred_test = ridge.predict(X_test)
-        mse_test = mean_squared_error(y_test, y_pred_test)
-        mae_test = mean_absolute_error(y_test, y_pred_test)
+        mse_test = mean_squared_error(y_test, y_pred_test)*self.max_target
+        mae_test = mean_absolute_error(y_test, y_pred_test)*self.max_target
 
         r2_train = ridge.score(x_train, y_train)
         r2_test = ridge.score(X_test, y_test)
@@ -227,7 +229,7 @@ class Modeling(Graphics):
 
             iter_security_lock += 1
         print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
-        self.createAndSaveModelsCompare(models = df_score, file_name ='lassomodelsCompare.png')
+        self.createAndSaveModelsCompare(models = df_score, file_name ='lassoModelsCompare.png')
 
     def lassoGridSearchCV(self, X_train: np.array, y_train: np.array, logspace=np.logspace(-5, 1.8, 25),
                           cv_number: int = 5):
@@ -241,7 +243,7 @@ class Modeling(Graphics):
 
         scores = -1 * np.array(grid.cv_results_['mean_test_score'])
         print('Generamos gráfica de comparación de grid\n')
-        self.createAndSaveplotGridValues(vector= alpha_vector, scores= scores, file_name= f"AlphaLasso{X_train.shape[1]}.png", metric= 'Alpha', n_folds= 5, x_label= 'Alpha')
+        self.createAndSaveplotGridValues(vector= alpha_vector, scores= scores, file_name= f"AlphaLassogrid{X_train.shape[1]}.png", metric= 'Alpha', n_folds= 5, x_label= 'Alpha')
 
         # Devolvemos el mejor aplpha
         return grid.best_params_['alpha']
@@ -253,12 +255,12 @@ class Modeling(Graphics):
         lasso.fit(X_train, y_train)
 
         y_pred_train = lasso.predict(X_train)
-        mse_train = mean_squared_error(y_train, y_pred_train)
-        mae_train = mean_absolute_error(y_train, y_pred_train)
+        mse_train = mean_squared_error(y_train, y_pred_train)*self.max_target
+        mae_train = mean_absolute_error(y_train, y_pred_train)*self.max_target
 
         y_pred_test = lasso.predict(X_test)
-        mse_test = mean_squared_error(y_test, y_pred_test)
-        mae_test = mean_absolute_error(y_test, y_pred_test)
+        mse_test = mean_squared_error(y_test, y_pred_test)*self.max_target
+        mae_test = mean_absolute_error(y_test, y_pred_test)*self.max_target
 
         r2_train = lasso.score(X_train, y_train)
         r2_test = lasso.score(X_test, y_test)
@@ -318,7 +320,7 @@ class Modeling(Graphics):
 
             iter_security_lock += 1
         print('\n Generamos gráficos comparativos de diferentes metricas para cada modelo probado\n')
-        self.createAndSaveModelsCompare(models = df_score, file_name ='randommodelsCompare.png')
+        self.createAndSaveModelsCompare(models = df_score, file_name ='randomModelsCompare.png')
 
     def randomForestGridSearchCV(self, X_train: np.array, y_train: np.array, maxDepth=range(1, 18), cv_number: int = 5):
         print('[INFO] Realizando cross validation ...')
@@ -331,7 +333,7 @@ class Modeling(Graphics):
 
         scores = np.array(grid.cv_results_['mean_test_score'])
         print('Generamos gráfica de comparación de grid\n')
-        self.createAndSaveplotGridValues(vector= maxDepth, scores= scores, file_name= f"randomforest{X_train.shape[1]}.png", metric= 'Max_depth', n_folds= 5, x_label= 'Alpha')
+        self.createAndSaveplotGridValues(vector= maxDepth, scores= scores, file_name= f"randomforestgrid{X_train.shape[1]}.png", metric= 'Max_depth', n_folds= 5, x_label= 'Alpha')
 
         # Devolvemos el mejor depth
         return grid.best_params_['max_depth']
@@ -345,12 +347,12 @@ class Modeling(Graphics):
         rf.fit(X_train, y_train)
 
         y_pred_train = rf.predict(X_train)
-        mse_train = mean_squared_error(y_train, y_pred_train)
-        mae_train = mean_absolute_error(y_train, y_pred_train)
+        mse_train = mean_squared_error(y_train, y_pred_train)*self.max_target
+        mae_train = mean_absolute_error(y_train, y_pred_train)*self.max_target
 
         y_pred_test = rf.predict(X_test)
-        mse_test = mean_squared_error(y_test, y_pred_test)
-        mae_test = mean_absolute_error(y_test, y_pred_test)
+        mse_test = mean_squared_error(y_test, y_pred_test)*self.max_target
+        mae_test = mean_absolute_error(y_test, y_pred_test)*self.max_target
 
         r2_train = rf.score(X_train, y_train)
         r2_test = rf.score(X_test, y_test)

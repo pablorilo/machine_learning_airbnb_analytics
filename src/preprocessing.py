@@ -81,20 +81,20 @@ class PreprocessingDate(Graphics):
 
             #3--Variables Numéricas. Mediante la clase Graphics generamos diferentes graficos de distribución de las variables 
             ##Graficamos##
-            #self.printText('Preprocesing 3: Estudio de variables numéricas.')
+            self.printText('Preprocesing 3: Estudio de variables numéricas.')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos su distribución\n')
-            #self.createAndSaveHistogram(df = self.df, file_name='numerichistogram2.png')
+            self.createAndSaveHistogram(df = self.df, file_name='numerichistogram.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos gráficos scatter respecto a la variable objetivo\n')
-            #self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png')
+            self.createAndSaveScatter(df = self.df, file_name='numericscatter.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos matriz de correlacion de todas las dimensiones\n')
-            #self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png')  
+            self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix.png')  
             print('\n-----------------------------------------------------------------------------------------\n') 
             print('Tras visualizar los scatterplot observamos que hay variables que a priori se relacionan bastante con el precio, como pueden ser Accommodates, Bathrooms, Bedrooms, beds, Cleaning Fee y Extra People. En las siguientes celdas vamos a analizar un poco más a fondo las dos últimas dimensiones mencionadas. Además también observamos que Minimum Nights y Maximum Nights en principio aportarían poco al modelo por lo tanto las vamos a eliminar. Además vamos a eliminar las dimensiones de Availability por que tampoco parece que tengan una fuerte relación con el precio y están muy correladas entre si')     
             print('\Visualizamos la grafica Scatter de como se correlacionan los Availability\n')
-            self.createAndSaveScatter(df = self.df, file_name='numericscatter3.png',target_col = 'Availability 30', columns=['Availability 60'])
+            self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png',target_col = 'Availability 30', columns=['Availability 60'])
             self.df.drop(['Minimum Nights', 'Maximum Nights', 'Availability 30', 'Availability 60', 'Availability 90', 'Availability 365' ],axis=1, inplace=True)
             print('\n-----------------------------------------------------------------------------------------\n')
             #Vamos a realizar un estudio sobre Cleaning Fee,vamos asumir que los alojamientos que no tienen asignado un valor de Cleaning Fee es por que no se cobra dicha tarifa, por lo que los pondremos a cero
@@ -139,7 +139,7 @@ class PreprocessingDate(Graphics):
             print(self.df.select_dtypes(include=['object']).describe())
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos su distribución\n')
-            #self.createAndSaveCategoricalDistribution(df = self.df, file_name='categoricalhistogram2.png')
+            self.createAndSaveCategoricalDistribution(df = self.df, file_name='categoricalhistogram.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Vamos a comprobar cuantos valores tienen los diferentes niveles de Cancelation Policy\n')
             print(self.df['Cancellation Policy'].value_counts())
@@ -166,7 +166,7 @@ class PreprocessingDate(Graphics):
             print(self.df['Bed Type'].value_counts())
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos como se distribuye en la variable objetivo por categorias')
-            self.createAndSaveViolinPlot(df=self.df,file_name='boxplot1.png')
+            self.createAndSaveViolinPlot(df=self.df,file_name='categoricalviolinplot.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora vamos a realizar la trasnformación de las variables '"Neighbourhood_Group_Cleansed"','"Property_Type"','"Room_Type"', '"Bed_Type"', '"Cancellation_Policy"', mediante MeanEncoder de la libreria Feature_engine.\n Vamos a visualizar que tipo de datos tenemos en este moment:\n')
             print(self.df.info())
@@ -176,10 +176,10 @@ class PreprocessingDate(Graphics):
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Ahora vamos a volver a visualizar los datos en gráficos')
             print('Visualizamos gráficos boxplot de las variables categoricas\n')
-            self.createAndSaveViolinPlot(df=self.df,file_name='boxplot2.png')
+            self.createAndSaveViolinPlot(df=self.df,file_name='categoricalviolinplot2.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos gráficos scatter respecto a la variable objetivo\n')
-            self.createAndSaveScatter(df = self.df, file_name='numericscatter2.png')
+            self.createAndSaveScatter(df = self.df, file_name='numericscatter3.png')
             print('\n-----------------------------------------------------------------------------------------\n')
             print('Visualizamos matriz de correlacion de todas las dimensiones\n')
             self.createAndSaveCorrelationMatrix(df = self.df, file_name='correlationmatrix2.png') 
@@ -193,7 +193,7 @@ class PreprocessingDate(Graphics):
             features = x_train.columns
             x_train_norm , y_train_norm = self.scaler(x=x_train,y=y_train)
             x_train_norm = pd.DataFrame(data= x_train_norm, columns= features)
-            data_dict = {'x_train':x_train,'x_train_norm':x_train_norm,'y_train':y_train,'y_train_norm':y_train_norm}
+            data_dict = {'x_train':x_train,'x_train_norm':x_train_norm,'y_train':y_train,'y_train_norm':y_train_norm, 'max_target':self.max_target}
             
             return data_dict
                       
